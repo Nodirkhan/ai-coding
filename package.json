@@ -14,7 +14,7 @@
     "db:seed": "tsx scripts/seed.ts"
   },
   "dependencies": {
-    "better-sqlite3": "^13.0.3",
+    "better-sqlite3": "^12.10.1",
     "drizzle-orm": "^0.45.4",
     "next": "16.4.0",
     "react": "19.3.0",
