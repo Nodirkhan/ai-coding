@@ -80,6 +80,7 @@ export function IssueForm({ issue, onSuccess, onCancel }: IssueFormProps) {
   return (
     <form
       onSubmit={handleSubmit}
+      aria-busy={submitting}
       className="flex flex-col gap-4 rounded-md border border-zinc-200 p-4"
       noValidate
     >
@@ -94,12 +95,18 @@ export function IssueForm({ issue, onSuccess, onCancel }: IssueFormProps) {
           onChange={(event) => setTitle(event.target.value)}
           className="rounded-md border border-zinc-300 px-3 py-2 text-sm"
           required
+          aria-invalid={Boolean(fieldErrors.title)}
+          aria-describedby={fieldErrors.title ? "title-error" : undefined}
         />
-        {fieldErrors.title?.map((message) => (
-          <p key={message} className="text-xs text-red-600">
-            {message}
-          </p>
-        ))}
+        {fieldErrors.title && (
+          <div id="title-error" role="alert">
+            {fieldErrors.title.map((message) => (
+              <p key={message} className="text-xs text-red-600">
+                {message}
+              </p>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="flex flex-col gap-1">
@@ -167,7 +174,11 @@ export function IssueForm({ issue, onSuccess, onCancel }: IssueFormProps) {
         </div>
       </div>
 
-      {formError && <p className="text-sm text-red-600">{formError}</p>}
+      {formError && (
+        <p role="alert" className="text-sm text-red-600">
+          {formError}
+        </p>
+      )}
 
       <div className="flex items-center gap-3">
         <button

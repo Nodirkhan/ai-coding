@@ -14,7 +14,11 @@ export default function IssueDetailsPage({ params }: IssueDetailsPageProps) {
       </Link>
 
       <Suspense
-        fallback={<p className="text-sm text-zinc-500">Loading issue…</p>}
+        fallback={
+          <p role="status" aria-live="polite" className="text-sm text-zinc-500">
+            Loading issue…
+          </p>
+        }
       >
         <IssueDetailsView params={params} />
       </Suspense>

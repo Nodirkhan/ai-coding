@@ -97,7 +97,11 @@ export function IssueDetailsView({ params }: IssueDetailsViewProps) {
   }
 
   if (loadState === "loading") {
-    return <p className="text-sm text-zinc-500">Loading issue…</p>;
+    return (
+      <p role="status" aria-live="polite" className="text-sm text-zinc-500">
+        Loading issue…
+      </p>
+    );
   }
 
   if (loadState === "not-found") {
@@ -112,7 +116,10 @@ export function IssueDetailsView({ params }: IssueDetailsViewProps) {
 
   if (loadState === "error") {
     return (
-      <div className="rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+      <div
+        role="alert"
+        className="rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-700"
+      >
         Could not load this issue. Please try again.
       </div>
     );
@@ -158,7 +165,10 @@ export function IssueDetailsView({ params }: IssueDetailsViewProps) {
       </header>
 
       {deleteError && (
-        <div className="rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+        <div
+          role="alert"
+          className="rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-700"
+        >
           {deleteError}
         </div>
       )}

@@ -76,27 +76,36 @@ export default function Home() {
         <button
           type="button"
           onClick={() => setShowForm((value) => !value)}
+          aria-expanded={showForm}
+          aria-controls="create-issue-form"
           className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white"
         >
           {showForm ? "Cancel" : "Create issue"}
         </button>
       </div>
 
-      {showForm && (
-        <IssueForm
-          onSuccess={() => {
-            setShowForm(false);
-            reloadIssues();
-          }}
-        />
-      )}
+      <div id="create-issue-form" hidden={!showForm}>
+        {showForm && (
+          <IssueForm
+            onSuccess={() => {
+              setShowForm(false);
+              reloadIssues();
+            }}
+          />
+        )}
+      </div>
 
       {loadState === "loading" && (
-        <p className="text-sm text-zinc-500">Loading issues…</p>
+        <p role="status" aria-live="polite" className="text-sm text-zinc-500">
+          Loading issues…
+        </p>
       )}
 
       {loadState === "error" && (
-        <div className="flex items-center justify-between rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+        <div
+          role="alert"
+          className="flex items-center justify-between rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-700"
+        >
           <span>Could not load issues. Please try again.</span>
           <button
             type="button"
