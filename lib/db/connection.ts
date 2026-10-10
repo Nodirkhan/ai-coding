@@ -10,7 +10,10 @@ import * as schema from "./schema";
  */
 export function resolveDatabasePath(): string {
   const configured = process.env.DATABASE_URL ?? "./data/trackly.db";
-  return path.resolve(process.cwd(), configured);
+  // This app always runs as a local Node process against a local SQLite
+  // file, never on a serverless platform, so the build doesn't need to trace
+  // and bundle the whole project for this dynamic path.
+  return path.resolve(/* turbopackIgnore: true */ process.cwd(), configured);
 }
 
 /**
@@ -27,3 +30,6 @@ export function createSqliteDb(dbPath: string) {
 
   return { sqlite, db: drizzle(sqlite, { schema }) };
 }
+
+/** The Drizzle database type shared by the app, scripts, and tests. */
+export type AppDatabase = ReturnType<typeof createSqliteDb>["db"];
