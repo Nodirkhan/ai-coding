@@ -1,7 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import type { IssueStatus } from "@/lib/db/schema";
 
-const STATUS_LABELS: Record<IssueStatus, string> = {
+export const STATUS_LABELS: Record<IssueStatus, string> = {
   TODO: "To do",
   IN_PROGRESS: "In progress",
   DONE: "Done",

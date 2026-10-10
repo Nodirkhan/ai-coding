@@ -3,7 +3,9 @@
 import { useEffect, useState } from "react";
 import { IssueForm } from "@/components/issues/issue-form";
 import { IssueList } from "@/components/issues/issue-list";
+import { IssueStats } from "@/components/issues/issue-stats";
 import type { Issue } from "@/lib/db/schema";
+import { countIssuesByStatus } from "@/lib/stats";
 
 type LoadState = "loading" | "ready" | "error";
 type FetchResult =
@@ -106,7 +108,12 @@ export default function Home() {
         </div>
       )}
 
-      {loadState === "ready" && <IssueList issues={issues} />}
+      {loadState === "ready" && (
+        <>
+          <IssueStats counts={countIssuesByStatus(issues)} />
+          <IssueList issues={issues} />
+        </>
+      )}
     </div>
   );
 }
