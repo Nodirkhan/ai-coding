@@ -1,4 +1,4 @@
-import { desc } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import { db as defaultDb } from "@/lib/db/client";
 import type { AppDatabase } from "@/lib/db/connection";
 import { issues, type Issue } from "@/lib/db/schema";
@@ -18,6 +18,14 @@ export class ValidationError extends Error {
 /** Returns every issue, most recently created first. */
 export function getIssues(database: AppDatabase = defaultDb): Issue[] {
   return database.select().from(issues).orderBy(desc(issues.id)).all();
+}
+
+/** Returns the issue with the given id, or `undefined` if none exists. */
+export function getIssueById(
+  id: number,
+  database: AppDatabase = defaultDb
+): Issue | undefined {
+  return database.select().from(issues).where(eq(issues.id, id)).get();
 }
 
 /**

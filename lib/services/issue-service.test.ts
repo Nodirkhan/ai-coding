@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { createTestDatabase } from "@/lib/db/test-helper";
-import { createIssue, getIssues, ValidationError } from "./issue-service";
+import { createIssue, getIssueById, getIssues, ValidationError } from "./issue-service";
 
 describe("issue service", () => {
   let testDb: ReturnType<typeof createTestDatabase>;
@@ -80,5 +80,17 @@ describe("issue service", () => {
 
   it("returns an empty list when there are no issues", () => {
     expect(getIssues(testDb.db)).toEqual([]);
+  });
+
+  it("fetches an existing issue by id", () => {
+    const created = createIssue({ title: "Find me" }, testDb.db);
+
+    const found = getIssueById(created.id, testDb.db);
+
+    expect(found).toEqual(created);
+  });
+
+  it("returns undefined when the issue does not exist", () => {
+    expect(getIssueById(999, testDb.db)).toBeUndefined();
   });
 });
