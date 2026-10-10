@@ -1,0 +1,12 @@
+node_modules/
+.next/
+out/
+dist/
+.env
+.env.local
+*.db
+*.sqlite
+*.sqlite3
+.scratch/
+npm-debug.log*
+.DS_Store
