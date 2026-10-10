@@ -1,6 +1,12 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { createTestDatabase } from "@/lib/db/test-helper";
-import { createIssue, getIssueById, getIssues, ValidationError } from "./issue-service";
+import {
+  createIssue,
+  deleteIssue,
+  getIssueById,
+  getIssues,
+  ValidationError,
+} from "./issue-service";
 
 describe("issue service", () => {
   let testDb: ReturnType<typeof createTestDatabase>;
@@ -92,5 +98,18 @@ describe("issue service", () => {
 
   it("returns undefined when the issue does not exist", () => {
     expect(getIssueById(999, testDb.db)).toBeUndefined();
+  });
+
+  it("deletes an existing issue", () => {
+    const created = createIssue({ title: "Delete me" }, testDb.db);
+
+    const deleted = deleteIssue(created.id, testDb.db);
+
+    expect(deleted).toBe(true);
+    expect(getIssueById(created.id, testDb.db)).toBeUndefined();
+  });
+
+  it("returns false when deleting a missing issue", () => {
+    expect(deleteIssue(999, testDb.db)).toBe(false);
   });
 });

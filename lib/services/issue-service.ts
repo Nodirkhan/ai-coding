@@ -28,6 +28,15 @@ export function getIssueById(
   return database.select().from(issues).where(eq(issues.id, id)).get();
 }
 
+/** Deletes the issue with the given id, returning `true` when a row changed. */
+export function deleteIssue(
+  id: number,
+  database: AppDatabase = defaultDb
+): boolean {
+  const result = database.delete(issues).where(eq(issues.id, id)).run();
+  return result.changes > 0;
+}
+
 /**
  * Validates and persists a new issue. Throws {@link ValidationError} when
  * `input` fails validation.

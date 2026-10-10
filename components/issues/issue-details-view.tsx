@@ -1,6 +1,7 @@
 "use client";
 
 import { use, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { PriorityBadge } from "@/components/issues/priority-badge";
 import { StatusBadge } from "@/components/issues/status-badge";
 import type { Issue } from "@/lib/db/schema";
@@ -41,8 +42,11 @@ type IssueDetailsViewProps = {
  */
 export function IssueDetailsView({ params }: IssueDetailsViewProps) {
   const { id } = use(params);
+  const router = useRouter();
   const [issue, setIssue] = useState<Issue | null>(null);
   const [loadState, setLoadState] = useState<LoadState>("loading");
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -61,6 +65,33 @@ export function IssueDetailsView({ params }: IssueDetailsViewProps) {
       cancelled = true;
     };
   }, [id]);
+
+  async function handleDelete() {
+    if (!window.confirm("Delete this issue?")) {
+      return;
+    }
+
+    setIsDeleting(true);
+    setDeleteError(null);
+
+    try {
+      const response = await fetch(`/api/issues/${id}`, { method: "DELETE" });
+      if (response.status === 204) {
+        router.push("/");
+        router.refresh();
+        return;
+      }
+      if (response.status === 404) {
+        setDeleteError("This issue doesn't exist or may have been deleted.");
+        return;
+      }
+      setDeleteError("Could not delete this issue. Please try again.");
+    } catch {
+      setDeleteError("Could not delete this issue. Please try again.");
+    } finally {
+      setIsDeleting(false);
+    }
+  }
 
   if (loadState === "loading") {
     return <p className="text-sm text-zinc-500">Loading issue…</p>;
@@ -90,14 +121,25 @@ export function IssueDetailsView({ params }: IssueDetailsViewProps) {
 
   return (
     <article className="flex flex-col gap-4">
-      <header className="flex flex-col gap-2">
-        <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">
-          {issue.title}
-        </h1>
-        <div className="flex items-center gap-2">
-          <StatusBadge status={issue.status} />
-          <PriorityBadge priority={issue.priority} />
+      <header className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="flex flex-col gap-2">
+          <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">
+            {issue.title}
+          </h1>
+          <div className="flex items-center gap-2">
+            <StatusBadge status={issue.status} />
+            <PriorityBadge priority={issue.priority} />
+          </div>
         </div>
+
+        <button
+          type="button"
+          onClick={handleDelete}
+          disabled={isDeleting}
+          className="rounded-md border border-red-200 px-4 py-2 text-sm font-medium text-red-700 disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          {isDeleting ? "Deleting…" : "Delete"}
+        </button>
       </header>
 
       <p className="whitespace-pre-wrap text-sm text-zinc-700">
@@ -105,6 +147,12 @@ export function IssueDetailsView({ params }: IssueDetailsViewProps) {
           <span className="italic text-zinc-400">No description.</span>
         )}
       </p>
+
+      {deleteError && (
+        <div className="rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+          {deleteError}
+        </div>
+      )}
 
       <dl className="grid grid-cols-2 gap-4 border-t border-zinc-200 pt-4 text-xs text-zinc-500">
         <div>
