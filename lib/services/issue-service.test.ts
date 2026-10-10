@@ -1,10 +1,12 @@
 import { beforeEach, describe, expect, it } from "vitest";
+import { issues } from "@/lib/db/schema";
 import { createTestDatabase } from "@/lib/db/test-helper";
 import {
   createIssue,
   deleteIssue,
   getIssueById,
   getIssues,
+  updateIssue,
   ValidationError,
 } from "./issue-service";
 
@@ -111,5 +113,56 @@ describe("issue service", () => {
 
   it("returns false when deleting a missing issue", () => {
     expect(deleteIssue(999, testDb.db)).toBe(false);
+  });
+
+  it("updates an existing issue and refreshes updatedAt", () => {
+    const original = testDb.db
+      .insert(issues)
+      .values({
+        title: "Original title",
+        description: "Original description",
+        status: "TODO",
+        priority: "LOW",
+        createdAt: "2024-01-01 00:00:00",
+        updatedAt: "2024-01-01 00:00:00",
+      })
+      .returning()
+      .get();
+
+    const updated = updateIssue(
+      original.id,
+      {
+        title: "Updated title",
+        description: "",
+        status: "DONE",
+        priority: "HIGH",
+      },
+      testDb.db
+    );
+
+    expect(updated).toBeDefined();
+    expect(updated).toMatchObject({
+      id: original.id,
+      title: "Updated title",
+      description: null,
+      status: "DONE",
+      priority: "HIGH",
+      createdAt: "2024-01-01 00:00:00",
+    });
+    expect(updated!.updatedAt).not.toBe(original.updatedAt);
+    expect(updated!.updatedAt >= updated!.createdAt).toBe(true);
+    expect(getIssueById(original.id, testDb.db)).toEqual(updated);
+  });
+
+  it("rejects invalid updates with a ValidationError", () => {
+    const created = createIssue({ title: "Valid title" }, testDb.db);
+
+    expect(() =>
+      updateIssue(created.id, { title: "   ", status: "NOT_A_STATUS" }, testDb.db)
+    ).toThrow(ValidationError);
+  });
+
+  it("returns undefined when updating a missing issue", () => {
+    expect(updateIssue(999, { title: "Missing" }, testDb.db)).toBeUndefined();
   });
 });

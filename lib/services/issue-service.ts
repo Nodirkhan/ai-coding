@@ -1,8 +1,12 @@
-import { desc, eq } from "drizzle-orm";
+import { desc, eq, sql } from "drizzle-orm";
 import { db as defaultDb } from "@/lib/db/client";
 import type { AppDatabase } from "@/lib/db/connection";
 import { issues, type Issue } from "@/lib/db/schema";
-import { createIssueSchema, type FieldErrors } from "@/lib/validation/issue";
+import {
+  createIssueSchema,
+  updateIssueSchema,
+  type FieldErrors,
+} from "@/lib/validation/issue";
 
 /**
  * Thrown when input fails validation. `fieldErrors` maps a field name to its
@@ -51,4 +55,30 @@ export function createIssue(
   }
 
   return database.insert(issues).values(result.data).returning().get();
+}
+
+/**
+ * Validates and updates an existing issue. Returns `undefined` when no issue
+ * exists for the given id, and throws {@link ValidationError} when `input`
+ * fails validation.
+ */
+export function updateIssue(
+  id: number,
+  input: unknown,
+  database: AppDatabase = defaultDb
+): Issue | undefined {
+  const result = updateIssueSchema.safeParse(input);
+  if (!result.success) {
+    throw new ValidationError(result.error.flatten().fieldErrors);
+  }
+
+  return database
+    .update(issues)
+    .set({
+      ...result.data,
+      updatedAt: sql`(current_timestamp)`,
+    })
+    .where(eq(issues.id, id))
+    .returning()
+    .get();
 }
