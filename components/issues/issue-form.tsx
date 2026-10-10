@@ -4,21 +4,27 @@ import { useState, type FormEvent } from "react";
 import {
   ISSUE_PRIORITIES,
   ISSUE_STATUSES,
+  type Issue,
   type IssuePriority,
   type IssueStatus,
 } from "@/lib/db/schema";
 import type { FieldErrors } from "@/lib/validation/issue";
 
 type IssueFormProps = {
-  onCreated: () => void;
+  issue?: Issue;
+  onSuccess: (issue: Issue) => void;
+  onCancel?: () => void;
 };
 
-/** A create-issue form. POSTs to /api/issues and reports success upward. */
-export function IssueForm({ onCreated }: IssueFormProps) {
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [status, setStatus] = useState<IssueStatus>("TODO");
-  const [priority, setPriority] = useState<IssuePriority>("MEDIUM");
+/** Creates or updates an issue via the matching API route. */
+export function IssueForm({ issue, onSuccess, onCancel }: IssueFormProps) {
+  const isEditing = Boolean(issue);
+  const [title, setTitle] = useState(issue?.title ?? "");
+  const [description, setDescription] = useState(issue?.description ?? "");
+  const [status, setStatus] = useState<IssueStatus>(issue?.status ?? "TODO");
+  const [priority, setPriority] = useState<IssuePriority>(
+    issue?.priority ?? "MEDIUM"
+  );
   const [submitting, setSubmitting] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [formError, setFormError] = useState<string | null>(null);
@@ -30,18 +36,24 @@ export function IssueForm({ onCreated }: IssueFormProps) {
     setFieldErrors({});
 
     try {
-      const response = await fetch("/api/issues", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title, description, status, priority }),
-      });
+      const response = await fetch(
+        issue ? `/api/issues/${issue.id}` : "/api/issues",
+        {
+          method: issue ? "PUT" : "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ title, description, status, priority }),
+        }
+      );
 
-      if (response.status === 201) {
-        setTitle("");
-        setDescription("");
-        setStatus("TODO");
-        setPriority("MEDIUM");
-        onCreated();
+      if (response.ok) {
+        const savedIssue: Issue = await response.json();
+        if (!isEditing) {
+          setTitle("");
+          setDescription("");
+          setStatus("TODO");
+          setPriority("MEDIUM");
+        }
+        onSuccess(savedIssue);
         return;
       }
 
@@ -49,6 +61,11 @@ export function IssueForm({ onCreated }: IssueFormProps) {
         const body = await response.json();
         setFieldErrors(body.fieldErrors ?? {});
         setFormError(body.error ?? "Please fix the errors below.");
+        return;
+      }
+
+      if (response.status === 404) {
+        setFormError("This issue no longer exists.");
         return;
       }
 
@@ -152,13 +169,32 @@ export function IssueForm({ onCreated }: IssueFormProps) {
 
       {formError && <p className="text-sm text-red-600">{formError}</p>}
 
-      <button
-        type="submit"
-        disabled={submitting}
-        className="self-start rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
-      >
-        {submitting ? "Creating…" : "Create issue"}
-      </button>
+      <div className="flex items-center gap-3">
+        <button
+          type="submit"
+          disabled={submitting}
+          className="self-start rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
+        >
+          {submitting
+            ? isEditing
+              ? "Saving…"
+              : "Creating…"
+            : isEditing
+              ? "Save changes"
+              : "Create issue"}
+        </button>
+
+        {onCancel && (
+          <button
+            type="button"
+            onClick={onCancel}
+            disabled={submitting}
+            className="text-sm font-medium text-zinc-600 disabled:opacity-50"
+          >
+            Cancel
+          </button>
+        )}
+      </div>
     </form>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { use, useEffect, useState } from "react";
+import { IssueForm } from "@/components/issues/issue-form";
 import { PriorityBadge } from "@/components/issues/priority-badge";
 import { StatusBadge } from "@/components/issues/status-badge";
 import type { Issue } from "@/lib/db/schema";
@@ -42,6 +43,7 @@ type IssueDetailsViewProps = {
 export function IssueDetailsView({ params }: IssueDetailsViewProps) {
   const { id } = use(params);
   const [issue, setIssue] = useState<Issue | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
   const [loadState, setLoadState] = useState<LoadState>("loading");
 
   useEffect(() => {
@@ -50,6 +52,7 @@ export function IssueDetailsView({ params }: IssueDetailsViewProps) {
       if (cancelled) return;
       if (result.outcome === "ok") {
         setIssue(result.issue);
+        setIsEditing(false);
         setLoadState("ready");
       } else if (result.outcome === "not-found") {
         setLoadState("not-found");
@@ -90,32 +93,56 @@ export function IssueDetailsView({ params }: IssueDetailsViewProps) {
 
   return (
     <article className="flex flex-col gap-4">
-      <header className="flex flex-col gap-2">
-        <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">
-          {issue.title}
-        </h1>
-        <div className="flex items-center gap-2">
-          <StatusBadge status={issue.status} />
-          <PriorityBadge priority={issue.priority} />
+      <header className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div className="flex flex-col gap-2">
+          <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">
+            {issue.title}
+          </h1>
+          <div className="flex items-center gap-2">
+            <StatusBadge status={issue.status} />
+            <PriorityBadge priority={issue.priority} />
+          </div>
         </div>
+        {!isEditing && (
+          <button
+            type="button"
+            onClick={() => setIsEditing(true)}
+            className="self-start rounded-md border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50"
+          >
+            Edit issue
+          </button>
+        )}
       </header>
 
-      <p className="whitespace-pre-wrap text-sm text-zinc-700">
-        {issue.description ?? (
-          <span className="italic text-zinc-400">No description.</span>
-        )}
-      </p>
+      {isEditing ? (
+        <IssueForm
+          issue={issue}
+          onSuccess={(updatedIssue) => {
+            setIssue(updatedIssue);
+            setIsEditing(false);
+          }}
+          onCancel={() => setIsEditing(false)}
+        />
+      ) : (
+        <>
+          <p className="whitespace-pre-wrap text-sm text-zinc-700">
+            {issue.description ?? (
+              <span className="italic text-zinc-400">No description.</span>
+            )}
+          </p>
 
-      <dl className="grid grid-cols-2 gap-4 border-t border-zinc-200 pt-4 text-xs text-zinc-500">
-        <div>
-          <dt className="font-medium text-zinc-600">Created</dt>
-          <dd>{formatDateTime(issue.createdAt)}</dd>
-        </div>
-        <div>
-          <dt className="font-medium text-zinc-600">Updated</dt>
-          <dd>{formatDateTime(issue.updatedAt)}</dd>
-        </div>
-      </dl>
+          <dl className="grid grid-cols-2 gap-4 border-t border-zinc-200 pt-4 text-xs text-zinc-500">
+            <div>
+              <dt className="font-medium text-zinc-600">Created</dt>
+              <dd>{formatDateTime(issue.createdAt)}</dd>
+            </div>
+            <div>
+              <dt className="font-medium text-zinc-600">Updated</dt>
+              <dd>{formatDateTime(issue.updatedAt)}</dd>
+            </div>
+          </dl>
+        </>
+      )}
     </article>
   );
 }

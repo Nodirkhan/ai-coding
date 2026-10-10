@@ -82,7 +82,7 @@ export default function Home() {
 
       {showForm && (
         <IssueForm
-          onCreated={() => {
+          onSuccess={() => {
             setShowForm(false);
             reloadIssues();
           }}

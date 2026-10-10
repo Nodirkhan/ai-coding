@@ -17,7 +17,9 @@ export const metadata: Metadata = {
   description: "A small issue tracker for tracking software development work.",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default function RootLayout({
+  children,
+}: Readonly<{ children: React.ReactNode }>) {
   return (
     <html
       lang="en"
