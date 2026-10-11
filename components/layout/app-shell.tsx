@@ -59,7 +59,7 @@ function CreateWorkItemDialog({
       onClick={(event) => {
         if (event.target === dialogRef.current) onClose();
       }}
-      className="m-auto w-full max-w-lg rounded-md bg-white p-0 shadow-xl backdrop:bg-black/40"
+      className="m-auto w-full max-w-lg rounded-sm bg-white p-0 shadow-xl backdrop:bg-black/40"
     >
       <div className="flex flex-col gap-4 p-5">
         <h2

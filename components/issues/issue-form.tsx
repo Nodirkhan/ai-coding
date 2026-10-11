@@ -82,7 +82,7 @@ export function IssueForm({ issue, onSuccess, onCancel }: IssueFormProps) {
     <form
       onSubmit={handleSubmit}
       aria-busy={submitting}
-      className="flex flex-col gap-4 rounded-md border border-zinc-200 p-4"
+      className="flex flex-col gap-4 rounded-sm border border-zinc-200 p-4"
       noValidate
     >
       <div className="flex flex-col gap-1">
@@ -94,7 +94,7 @@ export function IssueForm({ issue, onSuccess, onCancel }: IssueFormProps) {
           name="title"
           value={title}
           onChange={(event) => setTitle(event.target.value)}
-          className="rounded-md border border-zinc-300 px-3 py-2 text-sm"
+          className="rounded-sm border border-zinc-300 px-3 py-2 text-sm"
           required
           aria-invalid={Boolean(fieldErrors.title)}
           aria-describedby={fieldErrors.title ? "title-error" : undefined}
@@ -122,7 +122,7 @@ export function IssueForm({ issue, onSuccess, onCancel }: IssueFormProps) {
           name="description"
           value={description}
           onChange={(event) => setDescription(event.target.value)}
-          className="rounded-md border border-zinc-300 px-3 py-2 text-sm"
+          className="rounded-sm border border-zinc-300 px-3 py-2 text-sm"
           rows={3}
         />
       </div>
@@ -141,7 +141,7 @@ export function IssueForm({ issue, onSuccess, onCancel }: IssueFormProps) {
             onChange={(event) =>
               setStatus(event.target.value as IssueStatus)
             }
-            className="rounded-md border border-zinc-300 px-3 py-2 text-sm"
+            className="rounded-sm border border-zinc-300 px-3 py-2 text-sm"
           >
             {ISSUE_STATUSES.map((value) => (
               <option key={value} value={value}>
@@ -164,7 +164,7 @@ export function IssueForm({ issue, onSuccess, onCancel }: IssueFormProps) {
             onChange={(event) =>
               setPriority(event.target.value as IssuePriority)
             }
-            className="rounded-md border border-zinc-300 px-3 py-2 text-sm"
+            className="rounded-sm border border-zinc-300 px-3 py-2 text-sm"
           >
             {ISSUE_PRIORITIES.map((value) => (
               <option key={value} value={value}>
@@ -185,7 +185,7 @@ export function IssueForm({ issue, onSuccess, onCancel }: IssueFormProps) {
         <button
           type="submit"
           disabled={submitting}
-          className="self-start rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
+          className="self-start rounded-sm bg-[#0078d4] px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
         >
           {submitting
             ? isEditing
