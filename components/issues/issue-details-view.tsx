@@ -70,7 +70,7 @@ export function IssueDetailsView({ params }: IssueDetailsViewProps) {
   }, [id]);
 
   async function handleDelete() {
-    if (!window.confirm("Delete this issue?")) {
+    if (!window.confirm("Delete this work item?")) {
       return;
     }
 
@@ -80,17 +80,17 @@ export function IssueDetailsView({ params }: IssueDetailsViewProps) {
     try {
       const response = await fetch(`/api/issues/${id}`, { method: "DELETE" });
       if (response.status === 204) {
-        router.push("/");
+        router.push("/boards");
         router.refresh();
         return;
       }
       if (response.status === 404) {
-        setDeleteError("This issue doesn't exist or may have been deleted.");
+        setDeleteError("This work item doesn't exist or may have been deleted.");
         return;
       }
-      setDeleteError("Could not delete this issue. Please try again.");
+      setDeleteError("Could not delete this work item. Please try again.");
     } catch {
-      setDeleteError("Could not delete this issue. Please try again.");
+      setDeleteError("Could not delete this work item. Please try again.");
     } finally {
       setIsDeleting(false);
     }
@@ -99,16 +99,16 @@ export function IssueDetailsView({ params }: IssueDetailsViewProps) {
   if (loadState === "loading") {
     return (
       <p role="status" aria-live="polite" className="text-sm text-zinc-500">
-        Loading issue…
+        Loading work item…
       </p>
     );
   }
 
   if (loadState === "not-found") {
     return (
-      <div className="rounded-md border border-dashed border-zinc-300 p-6 text-center">
+      <div className="rounded-sm border border-dashed border-zinc-300 bg-white p-6 text-center">
         <p className="text-sm text-zinc-600">
-          This issue doesn&apos;t exist or may have been deleted.
+          This work item doesn&apos;t exist or may have been deleted.
         </p>
       </div>
     );
@@ -118,9 +118,9 @@ export function IssueDetailsView({ params }: IssueDetailsViewProps) {
     return (
       <div
         role="alert"
-        className="rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-700"
+        className="rounded-sm border border-red-200 bg-red-50 p-4 text-sm text-red-700"
       >
-        Could not load this issue. Please try again.
+        Could not load this work item. Please try again.
       </div>
     );
   }
@@ -130,9 +130,10 @@ export function IssueDetailsView({ params }: IssueDetailsViewProps) {
   }
 
   return (
-    <article className="flex flex-col gap-4">
+    <article className="flex flex-col gap-4 rounded-sm border border-zinc-200 bg-white p-5 shadow-sm">
       <header className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex flex-col gap-2">
+          <p className="text-xs text-zinc-500">Work item #{issue.id}</p>
           <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">
             {issue.title}
           </h1>
@@ -149,7 +150,7 @@ export function IssueDetailsView({ params }: IssueDetailsViewProps) {
               onClick={() => setIsEditing(true)}
               className="self-start rounded-md border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50"
             >
-              Edit issue
+              Edit work item
             </button>
           )}
 
@@ -167,7 +168,7 @@ export function IssueDetailsView({ params }: IssueDetailsViewProps) {
       {deleteError && (
         <div
           role="alert"
-          className="rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-700"
+          className="rounded-sm border border-red-200 bg-red-50 p-4 text-sm text-red-700"
         >
           {deleteError}
         </div>

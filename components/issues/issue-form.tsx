@@ -9,6 +9,7 @@ import {
   type IssueStatus,
 } from "@/lib/db/schema";
 import type { FieldErrors } from "@/lib/validation/issue";
+import { STATUS_LABELS } from "./status-badge";
 
 type IssueFormProps = {
   issue?: Issue;
@@ -65,7 +66,7 @@ export function IssueForm({ issue, onSuccess, onCancel }: IssueFormProps) {
       }
 
       if (response.status === 404) {
-        setFormError("This issue no longer exists.");
+        setFormError("This work item no longer exists.");
         return;
       }
 
@@ -144,7 +145,7 @@ export function IssueForm({ issue, onSuccess, onCancel }: IssueFormProps) {
           >
             {ISSUE_STATUSES.map((value) => (
               <option key={value} value={value}>
-                {value}
+                {STATUS_LABELS[value]}
               </option>
             ))}
           </select>
@@ -192,7 +193,7 @@ export function IssueForm({ issue, onSuccess, onCancel }: IssueFormProps) {
               : "Creating…"
             : isEditing
               ? "Save changes"
-              : "Create issue"}
+              : "Create work item"}
         </button>
 
         {onCancel && (

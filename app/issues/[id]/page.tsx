@@ -1,6 +1,6 @@
-import Link from "next/link";
 import { Suspense } from "react";
 import { IssueDetailsView } from "@/components/issues/issue-details-view";
+import { BackLink } from "@/components/layout/back-link";
 
 type IssueDetailsPageProps = {
   params: Promise<{ id: string }>;
@@ -8,15 +8,13 @@ type IssueDetailsPageProps = {
 
 export default function IssueDetailsPage({ params }: IssueDetailsPageProps) {
   return (
-    <div className="mx-auto flex max-w-3xl flex-1 flex-col gap-6 px-6 py-12 font-sans">
-      <Link href="/" className="text-sm text-blue-600 hover:underline">
-        ← Back to issues
-      </Link>
+    <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-4 p-4 font-sans">
+      <BackLink />
 
       <Suspense
         fallback={
           <p role="status" aria-live="polite" className="text-sm text-zinc-500">
-            Loading issue…
+            Loading work item…
           </p>
         }
       >

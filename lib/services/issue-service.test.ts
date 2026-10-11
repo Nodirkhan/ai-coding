@@ -154,6 +154,23 @@ describe("issue service", () => {
     expect(getIssueById(original.id, testDb.db)).toEqual(updated);
   });
 
+  it("updates only the status when given a status-only payload", () => {
+    const created = createIssue(
+      { title: "Keep me", description: "Keep this too", priority: "HIGH" },
+      testDb.db
+    );
+
+    const updated = updateIssue(created.id, { status: "DONE" }, testDb.db);
+
+    expect(updated).toMatchObject({
+      id: created.id,
+      title: "Keep me",
+      description: "Keep this too",
+      priority: "HIGH",
+      status: "DONE",
+    });
+  });
+
   it("rejects invalid updates with a ValidationError", () => {
     const created = createIssue({ title: "Valid title" }, testDb.db);
 
