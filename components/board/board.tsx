@@ -10,11 +10,41 @@ import {
   useSensors,
   type DragEndEvent,
   type DragStartEvent,
+  type KeyboardCoordinateGetter,
 } from "@dnd-kit/core";
 import { useIssues } from "@/components/issues/use-issues";
 import { groupIssuesByStatus, resolveDrop } from "@/lib/board";
 import { ISSUE_STATUSES, type Issue } from "@/lib/db/schema";
 import { BoardColumn, CardContent } from "./board-column";
+
+/** Left/Right arrows jump the dragged card to the neighbouring column. */
+const columnKeyboardCoordinates: KeyboardCoordinateGetter = (
+  event,
+  { context: { droppableRects, droppableContainers, collisionRect } }
+) => {
+  if (
+    (event.code !== "ArrowLeft" && event.code !== "ArrowRight") ||
+    !collisionRect
+  ) {
+    return undefined;
+  }
+  event.preventDefault();
+
+  const columns = droppableContainers
+    .getEnabled()
+    .map((container) => droppableRects.get(container.id))
+    .filter((rect) => rect !== undefined)
+    .sort((a, b) => a.left - b.left);
+  const centerX = collisionRect.left + collisionRect.width / 2;
+  const currentIndex = columns.findIndex(
+    (rect) => centerX >= rect.left && centerX <= rect.left + rect.width
+  );
+  const step = event.code === "ArrowRight" ? 1 : -1;
+  const target = columns[currentIndex + step];
+  if (!target) return undefined;
+
+  return { x: target.left, y: collisionRect.top };
+};
 
 export function Board() {
   const { issues, setIssues, loadState, retry } = useIssues();
@@ -26,7 +56,7 @@ export function Board() {
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
-    useSensor(KeyboardSensor)
+    useSensor(KeyboardSensor, { coordinateGetter: columnKeyboardCoordinates })
   );
 
   function handleDragStart(event: DragStartEvent) {
@@ -42,9 +72,6 @@ export function Board() {
     );
     if (!drop) return;
 
-    const previousStatus = issues.find(
-      (issue) => issue.id === drop.issueId
-    )!.status;
     setMoveError(null);
     setIssues((current) =>
       current.map((issue) =>
@@ -67,7 +94,7 @@ export function Board() {
       setIssues((current) =>
         current.map((issue) =>
           issue.id === drop.issueId && issue.status === drop.status
-            ? { ...issue, status: previousStatus }
+            ? { ...issue, status: drop.previousStatus }
             : issue
         )
       );

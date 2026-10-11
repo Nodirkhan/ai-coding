@@ -7,7 +7,11 @@ import {
 
 export type BoardColumns = Record<IssueStatus, Issue[]>;
 
-export type DropResult = { issueId: number; status: IssueStatus };
+export type DropResult = {
+  issueId: number;
+  status: IssueStatus;
+  previousStatus: IssueStatus;
+};
 
 const PRIORITY_RANK: Record<IssuePriority, number> = {
   HIGH: 0,
@@ -63,5 +67,5 @@ export function resolveDrop(
   const issue = issues.find((candidate) => candidate.id === issueId);
   if (!issue || issue.status === targetStatus) return null;
 
-  return { issueId, status: targetStatus };
+  return { issueId, status: targetStatus, previousStatus: issue.status };
 }

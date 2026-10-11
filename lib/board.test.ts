@@ -87,6 +87,7 @@ describe("resolveDrop", () => {
     expect(resolveDrop(issues, 1, "DONE")).toEqual({
       issueId: 1,
       status: "DONE",
+      previousStatus: "TODO",
     });
   });
 
